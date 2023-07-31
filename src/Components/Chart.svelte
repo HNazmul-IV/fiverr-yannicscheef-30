@@ -1,75 +1,100 @@
-<script>
+<script lang="ts">
 	import { ProgressBar } from '@skeletonlabs/skeleton';
+	import Widget from './Widget.svelte';
+	import {
+		BarController,
+		Chart,
+		Colors,
+		CategoryScale,
+		LinearScale,
+		BarElement,
+		Tooltip,
+		Legend
+	} from 'chart.js';
+	import { browser } from '$app/environment';
+	import { onMount, tick } from 'svelte';
 
+	let chart_element: HTMLCanvasElement;
 	const data = [
-		{ progress: 22, month: 'Jan' },
-		{ progress: 35, month: 'Feb' },
-		{ progress: 50, month: 'Mar' },
-		{ progress: 65, month: 'Apr' },
-		{ progress: 80, month: 'May' },
-		{ progress: 40, month: 'Jun' },
-		{ progress: 60, month: 'Jul' },
-		{ progress: 75, month: 'Aug' },
-		{ progress: 90, month: 'Sep' },
-		{ progress: 15, month: 'Oct' },
-		{ progress: 30, month: 'Nov' },
-		{ progress: 55, month: 'Dec' }
+		{ month: 'Jan', expense: 30, profit: 10 },
+		{ month: 'Feb', expense: 40, profit: 10 },
+		{ month: 'Mar', expense: 50, profit: 10 },
+		{ month: 'Apr', expense: 30, profit: 10 },
+		{ month: 'May', expense: 35, profit: 10 },
+		{ month: 'Jun', expense: 55, profit: 10 },
+		{ month: 'July', expense: 70, profit: 10 },
+		{ month: 'Aug', expense: 72, profit: 10 },
+		{ month: 'Sep', expense: 68, profit: 10 },
+		{ month: 'Oct', expense: 58, profit: 10 },
+		{ month: 'Nov', expense: 40, profit: 10 },
+		{ month: 'Dec', expense: 48, profit: 10 }
 	];
+
+	if (browser) {
+		Chart.register(Colors, BarController, CategoryScale, LinearScale, BarElement, Tooltip, Legend);
+	}
+
+	onMount(() => {
+		if (chart_element) {
+			const chart = new Chart(chart_element, {
+				type: 'bar',
+				data: {
+					labels: data.map((data) => data.month),
+					datasets: [
+						{
+							label: 'Expense',
+							data: data.map((row) => row.expense),
+							backgroundColor: '#023E8A',
+							barPercentage: 0.5
+						},
+						{
+							label: 'Profit',
+							data: data.map((row) => row.profit),
+							backgroundColor: '#48CAE4',
+							barPercentage: 0.5
+						}
+					]
+				},
+				options: {
+					plugins: {
+						tooltip: {
+							enabled: true
+						},
+						legend: {
+							position: 'bottom',
+
+							labels: {
+								color: '#ededed'
+							}
+						}
+					},
+					responsive: true,
+					scales: {
+						x: {
+							stacked: true,
+							ticks: {
+								color: '#fff'
+							},
+							grid: {
+								display: false
+							}
+						},
+						y: {
+							stacked: true,
+							ticks: {
+								color: '#fff'
+							},
+							grid: {
+								color: '#ffffff20'
+							}
+						}
+					}
+				}
+			});
+		}
+	});
 </script>
 
-<div>
-	<main>
-		<div>
-			<p class="text-4xl text">Analytics</p>
-		</div>
-		<div class="">
-			{#each data as item}
-				<div class="flex-grow bg-white mx-1 relative h-full rounded-2xl">
-					<div
-						class="bg-blue-500 absolute top-0 left-0 h-full rounded-2xl"
-						style="width: {item.progress}%"
-					/>
-				</div>
-			{/each}
-		</div>
-
-		<div />
-		<div />
-	</main>
-</div>
-
-<style>
-	@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300&display=swap');
-	.box {
-		max-width: 424px;
-		max-height: 140px;
-		border-radius: 20px;
-		background: var(--test-bg, #242940);
-	}
-
-	.text {
-		color: #fff;
-		font-family: Nunito;
-		font-size: 28px;
-		font-style: normal;
-		font-weight: 200;
-		line-height: normal;
-		letter-spacing: 2.24px;
-	}
-	.text-percentage {
-		color: #19dc2c;
-		font-size: 18px;
-		font-family: 'Nunito', sans-serif;
-		font-weight: 200;
-		letter-spacing: 1.44px;
-	}
-	.text-currency {
-		color: #fff;
-		font-family: Nunito;
-		font-size: 40px;
-		font-style: normal;
-		font-weight: 400;
-		line-height: normal;
-		letter-spacing: 3.2px;
-	}
-</style>
+<Widget title="Analytics" centeredTitle={true}>
+	<canvas height="250px" bind:this={chart_element} id="profit-expense-chart" />
+</Widget>
